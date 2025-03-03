@@ -8,13 +8,29 @@ let schemaMarginY = 50;
 let schemaMarginLeft = 50;
 let abstractionMarginX = 200;
 let abstractionMarginY = 200;
+let extraSquares = 2;
+
+
 
 function populate() {
-    for(let x = 0; x < amountCellsX; x ++) {
-        let line = new Array(amountCellsY).fill(0);
+    for (let x = 0; x < amountCellsX; x++) {
+        let line = new Array(amountCellsY);
+        for (let y = 0; y < amountCellsY; y++) {
+            //line[y] = (x + y) % 3;
+            if((x + y) % 9 == 0) {
+                line[y] = 1;
+            }
+            if((x + y) % 4 == 0) {
+                line[y] = 1;
+            }
+            else if((x + y) % 1 == 0) {
+                line[y] = 0;
+            } else line[y] = 1;
+        }
         dataSchema.push(line);
     }
 }
+
 
 function setup() {
     //Populate empty 2D array
@@ -39,7 +55,7 @@ function mouseClicked() {
     updateGrid();  
     drawMegaGrid();
     drawAbstraction();
-
+    drawConnections();
 }
 
 
@@ -89,21 +105,23 @@ function drawAbstraction() {
     for(let x = 0; x < amountCellsX; x ++) {
         fill(0);
         rect(2 * x * cellSize + abstractionMarginY,
-            abstractionMarginX - (3 * 2 * cellSize),
+            abstractionMarginX - (extraSquares * 2 * cellSize),
             cellSize,
-            (amountCellsY + 6) * 2 * cellSize
+            (amountCellsY + extraSquares * 2) * 2 * cellSize - cellSize
         );
-    } 
+    }
+
     //Draw the white basis
     for(let y = 0; y < amountCellsY; y ++) {
         //3 extra squares
         fill(255);
         stroke(0);
-        rect(abstractionMarginX - (3 * 2 * cellSize), 
+        rect(abstractionMarginX - (extraSquares * 2 * cellSize), 
              2 * y * cellSize + abstractionMarginY,
-             (amountCellsX + 6) * 2 * cellSize,
+             (amountCellsX + extraSquares * 2) * 2 * cellSize - cellSize,
              cellSize );
     }
+
     //Add black blocks to show the abstraction
     for(let y = 0; y < amountCellsY; y++) {
         for(let x = 0; x < amountCellsX; x++) {
@@ -122,6 +140,34 @@ function drawAbstraction() {
     }
 }
 
+/*
+function drawGrid() {
+    stroke(0);
+    for(let y = 0; y < amountCellsY; y++) {
+        for(let x = 0; x < amountCellsX; x++) {
+            if(dataSchema[x][y] == 0) {
+                fill(255);
+            } else fill(0);
+            rect(schemaMarginX + x * cellSize, 
+            schemaMarginY + y * cellSize, 
+            cellSize, 
+            cellSize);
+        }
+    }
+}
+*/
+
+//Connect the schema and the abstraction
+function drawConnections() {
+    stroke(0);
+    for(let y = 0; y < amountCellsY; y++) {
+        line(abstractionMarginX - (extraSquares * 2 * cellSize) + (amountCellsX + extraSquares * 2) * 2 * cellSize - cellSize,
+            2 * y * cellSize + abstractionMarginY + (cellSize / 2),
+            schemaMarginX,
+            schemaMarginY + y * cellSize + (cellSize / 2));
+    }
+}
+
 function drawMegaGrid() {
     stroke(210);
     fill(255);
@@ -137,7 +183,24 @@ function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
     schemaMarginY = (height - (cellSize * amountCellsY)) / 2;
     schemaMarginX = (width - (cellSize * amountCellsX)) - schemaMarginLeft;
+    background(240);
     drawMegaGrid();
     drawAbstraction();
-    background(240);
+    drawConnections();
 }
+
+
+
+//TODO
+//Geometry
+    //Make sure that things are always alligned with the grid and that the abstraction is facing the schema in the middle
+    //Connect the dots of the schemas and the abstraction.
+
+//Expansions
+    //Make a system to write up the pattern
+    //Make a system to 
+
+//Web
+    //Remove margins around the canvas
+    //Add controls on top maybe
+    //
