@@ -1,14 +1,19 @@
 //Two Dimensional Array with the of the schema
 let dataSchema = [];
-let cellSize = 10;
-let amountCellsX = 30;
-let amountCellsY = 30;
-let schemaMarginX = 300;
-let schemaMarginY = 50;
-let schemaMarginLeft = 50;
-let abstractionMarginX = 200;
-let abstractionMarginY = 200;
+let cellSize = 25;
+let amountCellsX = 8;
+let amountCellsY = 8;
+let schemaMarginX = 0;
+let schemaMarginY = 0;
+let abstractionMarginX = 0;
+let abstractionMarginY = 0;
 let extraSquares = 2;
+let widthAbstraction = (amountCellsX + extraSquares * 2) * 2 * cellSize - cellSize;
+let heightAbstraction = (amountCellsY + extraSquares * 2) * 2 * cellSize - cellSize;
+let widthSchema = amountCellsX * cellSize;
+let heightSchema = amountCellsY * cellSize;
+let marginLeft = 2 * cellSize;
+let switchColor = true;
 
 
 
@@ -32,28 +37,55 @@ function populate() {
 }
 
 
+
 function setup() {
     //Populate empty 2D array
     populate();
     let cnv =createCanvas(windowWidth, windowHeight);
     cnv.style('display', 'block');
     background(200);
-    schemaMarginY = (height - (cellSize * amountCellsY)) / 2;
-    schemaMarginX = (width - (cellSize * amountCellsX)) - schemaMarginLeft;
+    refreshDimensions();
     drawMegaGrid();
     drawAbstraction();
-    console.log(width);
+    drawConnections();
 }
+
+function refreshDimensions() {
+
+    abstractionMarginX = 2 * extraSquares * cellSize + (width - widthAbstraction - widthSchema) / 2 ;
+    abstractionMarginY = 2 * extraSquares * cellSize + (height - heightAbstraction) / 2;
+
+    schemaMarginX = abstractionMarginX + widthAbstraction;
+    schemaMarginY = (height - (cellSize * amountCellsY)) / 2;
+
+
+    
+
+
+    schemaMarginX = int(schemaMarginX / cellSize) * cellSize;
+    schemaMarginY = int(schemaMarginY / cellSize) * cellSize;
+
+    abstractionMarginX = int(abstractionMarginX / cellSize) * cellSize;
+    abstractionMarginY = int(abstractionMarginY / cellSize) * cellSize;
+
+    
+}
+
 
 function draw() {
-    
     drawGrid();
     hoverGrid();
+    if(mouseIsPressed) {
+        updateWhenMouse();
+    }
 }
 
-function mouseClicked() {
+function updateWhenMouse() {
+    
+    refreshDimensions();
     updateGrid();  
     drawMegaGrid();
+    drawGrid();
     drawAbstraction();
     drawConnections();
 }
@@ -89,7 +121,7 @@ function updateGrid() {
     let x = int((mouseX - schemaMarginX) / cellSize);
     let y = int((mouseY - schemaMarginY) / cellSize);
     if(x >= 0 && x < amountCellsX && y >= 0 && y < amountCellsY) {
-        if(dataSchema[x][y] == 0) {
+        if(switchColor) {
             dataSchema[x][y] = 1;
         } else dataSchema[x][y] = 0;
         rect(schemaMarginX + x * cellSize, 
@@ -104,8 +136,8 @@ function drawAbstraction() {
     //Draw the black basis
     for(let x = 0; x < amountCellsX; x ++) {
         fill(0);
-        rect(2 * x * cellSize + abstractionMarginY,
-            abstractionMarginX - (extraSquares * 2 * cellSize),
+        rect(2 * x * cellSize + abstractionMarginX,
+            abstractionMarginY - (extraSquares * 2 * cellSize),
             cellSize,
             (amountCellsY + extraSquares * 2) * 2 * cellSize - cellSize
         );
@@ -140,23 +172,6 @@ function drawAbstraction() {
     }
 }
 
-/*
-function drawGrid() {
-    stroke(0);
-    for(let y = 0; y < amountCellsY; y++) {
-        for(let x = 0; x < amountCellsX; x++) {
-            if(dataSchema[x][y] == 0) {
-                fill(255);
-            } else fill(0);
-            rect(schemaMarginX + x * cellSize, 
-            schemaMarginY + y * cellSize, 
-            cellSize, 
-            cellSize);
-        }
-    }
-}
-*/
-
 //Connect the schema and the abstraction
 function drawConnections() {
     stroke(0);
@@ -181,24 +196,35 @@ function drawMegaGrid() {
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
-    schemaMarginY = (height - (cellSize * amountCellsY)) / 2;
-    schemaMarginX = (width - (cellSize * amountCellsX)) - schemaMarginLeft;
+    refreshDimensions();
     background(240);
     drawMegaGrid();
     drawAbstraction();
     drawConnections();
+    refreshDimensions
+}
+
+function keyPressed() {
+    if (key === 's') {
+      if(switchColor) {
+        switchColor = false;
+      } else switchColor = true;
+    }
 }
 
 
 
 //TODO
 //Geometry
-    //Make sure that things are always alligned with the grid and that the abstraction is facing the schema in the middle
-    //Connect the dots of the schemas and the abstraction.
+//Ensure that the space is always sufficient using the width of the screen
 
 //Expansions
     //Make a system to write up the pattern
-    //Make a system to 
+    //Make a system to change the size of the pattern
+    //Repetition of the pattern
+    //Show what color is on
+    //Invert Pattern
+    //Select a part of the pattern as the pattern
 
 //Web
     //Remove margins around the canvas
