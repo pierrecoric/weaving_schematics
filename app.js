@@ -1,34 +1,29 @@
 //Two Dimensional Array with the of the schema
 let dataSchema = [];
-let cellSize = 25;
-let amountCellsX = 8;
-let amountCellsY = 8;
+let cellSize = 30;
+let amountCellsX = 9;
+let amountCellsY = 9;
+let extraSquares = 1;
+
 let schemaMarginX = 0;
 let schemaMarginY = 0;
+let schemaMarginLeft = extraSquares * 2 * cellSize;
 let abstractionMarginX = 0;
 let abstractionMarginY = 0;
-let extraSquares = 2;
-let widthAbstraction = (amountCellsX + extraSquares * 2) * 2 * cellSize - cellSize;
-let heightAbstraction = (amountCellsY + extraSquares * 2) * 2 * cellSize - cellSize;
+let abstractionOffset = extraSquares * cellSize;
+let widthAbstraction = (amountCellsX * 2 * cellSize) - cellSize + (2 * abstractionOffset);
+let heightAbstraction = (amountCellsY * 2 * cellSize) - cellSize  + (2 * abstractionOffset);
 let widthSchema = amountCellsX * cellSize;
 let heightSchema = amountCellsY * cellSize;
-let marginLeft = 2 * cellSize;
-let switchColor = true;
+let marginLeft = 0;
 
-
-
+//Function to populate the initial array
 function populate() {
     for (let x = 0; x < amountCellsX; x++) {
         let line = new Array(amountCellsY);
         for (let y = 0; y < amountCellsY; y++) {
             //line[y] = (x + y) % 3;
-            if((x + y) % 9 == 0) {
-                line[y] = 1;
-            }
-            if((x + y) % 4 == 0) {
-                line[y] = 1;
-            }
-            else if((x + y) % 1 == 0) {
+            if((x + y) % 2 == 0) {
                 line[y] = 0;
             } else line[y] = 1;
         }
@@ -37,11 +32,12 @@ function populate() {
 }
 
 
-
 function setup() {
     //Populate empty 2D array
     populate();
+    //Create canvas.
     let cnv =createCanvas(windowWidth, windowHeight);
+    cnv.elt.addEventListener("contextmenu", e => e.preventDefault());
     cnv.style('display', 'block');
     background(200);
     refreshDimensions();
@@ -50,25 +46,27 @@ function setup() {
     drawConnections();
 }
 
+
+
 function refreshDimensions() {
-
-    abstractionMarginX = 2 * extraSquares * cellSize + (width - widthAbstraction - widthSchema) / 2 ;
-    abstractionMarginY = 2 * extraSquares * cellSize + (height - heightAbstraction) / 2;
-
-    schemaMarginX = abstractionMarginX + widthAbstraction;
+    //Margins of the abstraction
+    abstractionMarginX = (width - widthAbstraction) / 2  + (abstractionOffset);
+    abstractionMarginY = (height - heightAbstraction) / 2 + (abstractionOffset);
+    //Margins of the schema
+    schemaMarginX = abstractionMarginX + widthAbstraction - abstractionOffset + schemaMarginLeft;
     schemaMarginY = (height - (cellSize * amountCellsY)) / 2;
 
+    //Allign margins on the grid.
+    schemaMarginX = roundOnCellSize(schemaMarginX);
+    schemaMarginY = roundOnCellSize(schemaMarginY);
+    abstractionMarginX = roundOnCellSize(abstractionMarginX);
+    abstractionMarginY = roundOnCellSize(abstractionMarginY);
 
-    
+    //The width of the whole thing = widthAbstraction + widthSchema + schemaMarginLeft
+}
 
-
-    schemaMarginX = int(schemaMarginX / cellSize) * cellSize;
-    schemaMarginY = int(schemaMarginY / cellSize) * cellSize;
-
-    abstractionMarginX = int(abstractionMarginX / cellSize) * cellSize;
-    abstractionMarginY = int(abstractionMarginY / cellSize) * cellSize;
-
-    
+function roundOnCellSize(n) {
+    return int(n / cellSize) * cellSize;
 }
 
 
@@ -81,7 +79,6 @@ function draw() {
 }
 
 function updateWhenMouse() {
-    
     refreshDimensions();
     updateGrid();  
     drawMegaGrid();
@@ -121,7 +118,7 @@ function updateGrid() {
     let x = int((mouseX - schemaMarginX) / cellSize);
     let y = int((mouseY - schemaMarginY) / cellSize);
     if(x >= 0 && x < amountCellsX && y >= 0 && y < amountCellsY) {
-        if(switchColor) {
+        if(mouseButton == LEFT) {
             dataSchema[x][y] = 1;
         } else dataSchema[x][y] = 0;
         rect(schemaMarginX + x * cellSize, 
@@ -136,10 +133,12 @@ function drawAbstraction() {
     //Draw the black basis
     for(let x = 0; x < amountCellsX; x ++) {
         fill(0);
-        rect(2 * x * cellSize + abstractionMarginX,
-            abstractionMarginY - (extraSquares * 2 * cellSize),
+        //Black Rectangle
+        rect(
+            2 * x * cellSize + abstractionMarginX,
+            abstractionMarginY - (abstractionOffset),
             cellSize,
-            (amountCellsY + extraSquares * 2) * 2 * cellSize - cellSize
+            (amountCellsY * 2 * cellSize) - cellSize  + (2 * abstractionOffset)
         );
     }
 
@@ -148,9 +147,9 @@ function drawAbstraction() {
         //3 extra squares
         fill(255);
         stroke(0);
-        rect(abstractionMarginX - (extraSquares * 2 * cellSize), 
+        rect(abstractionMarginX - (abstractionOffset), 
              2 * y * cellSize + abstractionMarginY,
-             (amountCellsX + extraSquares * 2) * 2 * cellSize - cellSize,
+             (amountCellsX * 2 * cellSize) - cellSize + (2 * abstractionOffset),
              cellSize );
     }
 
@@ -176,12 +175,15 @@ function drawAbstraction() {
 function drawConnections() {
     stroke(0);
     for(let y = 0; y < amountCellsY; y++) {
-        line(abstractionMarginX - (extraSquares * 2 * cellSize) + (amountCellsX + extraSquares * 2) * 2 * cellSize - cellSize,
+        line(
+            abstractionMarginX + widthAbstraction - (abstractionOffset),
             2 * y * cellSize + abstractionMarginY + (cellSize / 2),
             schemaMarginX,
-            schemaMarginY + y * cellSize + (cellSize / 2));
+            schemaMarginY + y * cellSize + (cellSize / 2)
+        );
     }
 }
+
 
 function drawMegaGrid() {
     stroke(210);
@@ -204,13 +206,15 @@ function windowResized() {
     refreshDimensions
 }
 
-function keyPressed() {
-    if (key === 's') {
-      if(switchColor) {
-        switchColor = false;
-      } else switchColor = true;
-    }
+
+//Use the form to change the size of the thing.
+let formSize = document.getElementById("formSize");
+function handleFormSize(event) {
+    event.preventDefault();
+    alert("proute");
 }
+
+formSize.addEventListener("submit", handleFormSize);
 
 
 
